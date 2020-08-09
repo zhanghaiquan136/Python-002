@@ -76,7 +76,7 @@ if __name__ == '__main__':
     mutex = mp.Manager().RLock()
     cpu_count = mp.cpu_count()
     print("最大进程数:", cpu_count)
-    p = mp.Pool(cpu_count)
+    mp_pool = mp.Pool(cpu_count)
     # 获取 s 命令行参数列表
     args = sys.argv
     # 处理命令行参数
@@ -109,20 +109,20 @@ if __name__ == '__main__':
     if len(ip_list) == 1:
         if f == 'ping':
             w = 'result.json'
-            p.apply_async(ping_ip, args=(start_ip, w, mutex))
+            mp_pool.apply_async(ping_ip, args=(start_ip, w, mutex))
         if f == 'tcp':
             for port in range(1, 1024):
-                p.apply_async(tcp_port, args=(start_ip, port, w, mutex))
+                mp_pool.apply_async(tcp_port, args=(start_ip, port, w, mutex))
     elif len(ip_list) == 2:
         if f == 'ping':
             w = 'result.json'
             for i in range(int(start_ip.split(".")[-1]), int(end_ip.split(".")[-1]) + 1):
                 ip = start_ip[:start_ip.rfind('.') + 1] + str(i)
-                p.apply_async(ping_ip, args=(ip, w, mutex))
+                mp_pool.apply_async(ping_ip, args=(ip, w, mutex))
         if f == 'tcp':
             for i in range(int(start_ip.split(".")[-1]), int(end_ip.split(".")[-1]) + 1):
                 ip = start_ip[:start_ip.rfind('.') + 1] + str(i)
                 for port in range(3300, 3310):
-                    p.apply_async(tcp_port, args=(ip, port, w, mutex))
-    p.close()
-    p.join()
+                    mp_pool.apply_async(tcp_port, args=(ip, port, w, mutex))
+    mp_pool.close()
+    mp_pool.join()
